@@ -1,0 +1,110 @@
+Capítulo 03 - Operações Compostas
+Nesse capítulo aprendemos:
+
+
+⦁	O dono da empresa agora está satisfeito com o calculo de aumento usando o BigDecimal. Mas podemos refatorar esse código.
+
+Codigo sem refatoração:
+
+//Função map = mapear os valores do primeiro array para um outro conjunto, no caso foi para outro array
+//Ao mapear também estamos dando o aumento de 10%
+val salariosComAumento = salarios.map { salario ->
+    if(salario < "5000.00".toBigDecimal()){
+        salario + "500.00".toBigDecimal()
+    }else{
+        (salario * taxaAumento).setScale(2, RoundingMode.UP)
+    }
+}
+    .toTypedArray()
+
+println(salariosComAumento.contentToString())
+
+	-Para essa refatoração basta selecionar o bloco "if com o else" e apertar o "ctrl + alt + m". Assim vamos refatorar esse trecho para uma função com o nome calculaAumentoRelativo(). O código vai ficar assim:
+
+    val salariosComAumento = salarios.map {
+            salario -> calculaAumentoRelativo(salario, taxaAumento)
+    }
+        .toTypedArray()
+
+    println(salariosComAumento.contentToString())
+}
+
+private fun calculaAumentoRelativo(
+    salario: BigDecimal,
+    taxaAumento: BigDecimal
+) = if (salario < "5000.00".toBigDecimal()) {
+    salario + "500.00".toBigDecimal()
+} else {
+    (salario * taxaAumento).setScale(2, RoundingMode.UP)
+}
+
+
+⦁	O dono da empresa agora quer saber o gasto mensal que eles esta tendo para pagar os funcionários depois do aumento, e quanto ele gastará nos próximos 6 meses;
+
+
+⦁	Em array de tipos primitivos temos a função sum(), não vamos ter ela no nosso array de salario, pois esse não é de tipo primitivo. Por isso vamos criar a função sum para ele, vamos chamá-la de somatoria():
+
+
+
+//Para manter esse padrão (chamar função com "." apos o array - queremos fazer salarios.somatoria()) temos que criar uma funçao: extend function
+
+//Abaixo é assinatura de nossa extend function, onde Array<BigDecimal> é o que vamos receber - é o array que vai chamar (tratamos este como 'this')
+
+//Reduce é uma função para somar todos os elementos de um conjunto
+
+fun Array<BigDecimal>.somatoria() : BigDecimal{
+    return this.reduce { acumulador, valor ->
+        acumulador + valor
+    }
+}
+
+Agora poderemos fazer:
+
+	val gastoMensal = salariosComAumento.somatoria()
+
+⦁	O requisito para saber o gasto mensal está feito no item anterior;
+
+⦁	Agora vamos usar a função fold para fazer o calculo dos 6 meses:
+
+val gastoTotal = salariosComAumento.fold(gastoMensal){ acumulador, salario ->
+    acumulador + (salario * meses).setScale(2, RoundingMode.UP)
+}
+println("Gasto total: $gastoTotal")
+
+
+Fold é muito parecido com a função reduce, mas fold exige um valor inicial!
+
+
+⦁	O chefe agora quer a média dos 3 maiores salários, como fazer? Podemos pegar o array, ordernar do menor para maior e pegar os 3 ultimos e fazer a media chamando a função media. Array de primitivo já tem a função average para calcular média, já que nosso array não é primitivo, vamos criar nossa própria função:
+
+
+//Ordenando os salários em ordem cescente e os colocando em uma lista
+
+val salariosOrdenados = salariosComAumento.sorted()
+
+//Pegando os 3 últimos itens da lista e colocando em outra lista por padrao, mas vamos usar o toTypedArray para voltar em array!
+
+val osTresUltimosSalarios = salariosOrdenados.takeLast(3).toTypedArray()
+
+//Array primitivo tem o average() para calcular media, mas estamos com tipos não primitivos
+//Vamos criar essa função!
+
+val media = osTresUltimosSalarios.media()
+
+	A função média:
+fun Array<BigDecimal>.media(): BigDecimal {
+    return if(this.isEmpty()){
+        BigDecimal.ZERO
+    }else{
+        this.somatoria() / this.size.toBigDecimal()
+    }
+}
+
+⦁	Note que estamos criando muita variável apenas para guardar o resultado de nossas funções, depois não as usamos mais, podemos melhorar colocando uma resposta na outra, ficando assim:
+
+val media =salariosComAumento.sorted().takeLast(3).toTypedArray().media()
+
+⦁	Pergunta: Numa competição de saltos ornamentais, cada competidor recebe 4 notas dos jurados. A menor nota é descartada e depois é tirada a média simples das 3 notas restantes. Considerando o seguinte array com as notas de um competidor: val notas = intArrayOf(7, 5, 8, 9). Como calcular essa média apenas compondo funções presentes na linguagem?
+Resposta:
+val media = notas.sorted().takeLast(3).average()
+

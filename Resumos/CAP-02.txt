@@ -1,0 +1,158 @@
+Capítulo 02 - Funções de agregação
+Nesse capítulo aprendemos:
+
+⦁	Aprendemos o que é range (intervalo) de valores, como criá-los e manipulá-los:
+
+
+//Criando ranges:
+val serie: IntRange = 1.rangeTo(10)
+for(s in serie){
+    print(" "+ s)
+}
+
+println()
+
+//Criando ranges de modo simplificado e com saltos de 2 em 2 (pares):
+val numerosPares = 0..100 step 2
+for(numeroPar in numerosPares){
+    print("$numeroPar ")
+}
+
+println()
+
+//Criando ranges de modo simplificado, com saltos de 2 em 2 (pares) e sem incluir o 100:
+val numerosParesSem100 = 0.until(100) step 2
+for(numeroPar2 in numerosParesSem100){
+    print("$numeroPar2 ")
+}
+
+println()
+
+//Criando ranges REVERSO de modo simplificado e com saltos de 2 em 2 (pares):
+val numerosParesReverso = 100 downTo 0 step 2
+for(numeroParReverso in numerosParesReverso){
+    print("$numeroParReverso ")
+}
+
+println()
+
+//Criando um range, e depois verificando se um valor está dentro desse range (Devem ser do mesmo tipo)!
+val intervalo = 1500.0..5000.0
+val salario = 4000.0
+if(salario in intervalo){
+    println("O salário está dentro do intervalo!")
+}else{
+    println("O salário não está dentro do intervalo!")
+}
+
+println()
+
+//Criando um range, e depois verificando se um valor está dentro desse range (Devem ser do mesmo tipo)!
+val alfabeto = 'a'..'z'
+val letra = 'k'
+println(letra in alfabeto)
+
+
+⦁	Há operações que são comuns, maior, menor, media...Então já há código pronto para isso, veja os exemplos:
+
+
+//Array de idade:
+val idades: IntArray = intArrayOf(10,12,18,33,40,67)
+
+//Pegando maior idade
+val maiorIdade = idades.maxOrNull()
+println("A maior idade é: $maiorIdade")
+
+//Pegando a menor idade
+val menorIdade = idades.minOrNull()
+println("A menor idade é: $menorIdade")
+
+//Pegando a media de idade
+val mediaIdade = idades.average()
+println("A média de idade é: $mediaIdade")
+
+//Verificar se todos são maiores de 18 anos
+val todosMaioires = idades.all { it >= 18 }
+println("Todos são maiores? $todosMaioires")
+
+//Verificar se pelo menos um é maior de 18 anos
+val haPeloMenosUmMaioir = idades.any() { it >= 18 }
+println("Existe pelo menos um maior de idade? $haPeloMenosUmMaioir")
+
+//Filtrar valores: selecionar apenas os maiores de idade. A resposta vai para outra lista
+val filtroMaiorDeIdade = idades.filter { it >= 18 }
+println("Os maiores de idade: $filtroMaiorDeIdade")
+
+//Filtrar um valor exato: seleciona o elemento desejado e o retorna.
+//Se nesse eu colocar > 18, o valor retornado será o proximo maior, no caso 33! Só retorna um!
+val idadeIgual18 = idades.find { it == 18 }
+println("Selecionei o: $idadeIgual18")
+
+⦁	Array de Objeto:
+Lembra que tinhamos um array de salário e estavamos dando um aumento de 10%? Agora o dono da empresa quer mudar isso, ele quer dar um aumento de 10% para todos, mas caso esse aumento não reflita em um aumento de 500 reais ele quer que o aumento seja de 500 reais. E também tinhamos o problema de arredondamento e ele quer que isso se resolva, como fazer?
+
+Para o arredondamento é so mudar o uso de Double para BigDecimal, só que ele não é primitivo da linguagem, logo não temos um BigDecimalArray ou bigDecimalArray.of(), portanto teremos que usar o um array genérico, no caso: Array<BigDecimal>(tamanho){BigDecimal.ZERO}
+
+Criando o array de BigDecimal:
+val salarios = Array<BigDecimal>(5){BigDecimal.ZERO }
+salarios[0] = "1500.55".toBigDecimal()
+salarios[1] = "2000.00".toBigDecimal()
+salarios[2] = "1500.55".toBigDecimal()
+
+Para ter o valor correto do BigDecimal, usamos a classe String, ou seja, criamos o valor como String "" e depois chamamos o método toBigDecimal()
+
+⦁	Por BigDecimal não ser primitivo ele não tem o bigDecimalArrayOf(), logo dificulta ficar criando elementos para ele. Mas nós criamos a nossa propria função para isso:
+
+
+//vararg indica que vamos passar X número de quantidade de variável, podemos passar 1 valor, 2 valores, etc...
+//vararg ao pegará o todas as variáveis e colocará em um array cujo size é X
+
+fun bigDecimalArrayOf(vararg valores: String):Array<BigDecimal>{
+    return Array<BigDecimal>(valores.size){i ->
+        valores[i].toBigDecimal()
+    }
+}
+
+Agora é possível criar o array de BigDecimal com a nossa função:
+
+val salarios = bigDecimalArrayOf("1500.55", "2000.00", "5000.00", "10000.00")
+
+
+⦁	Função Map: em uma referencia de array podeamos chamar a função map. Essa função irá pegar cada elemento seu e mapear (enviar) para outra coleção, no nosso exemplo será para outro array chamado valoresComAumento. Veja o código:
+
+//Função map = mapear os valores do primeiro array para um outro conjunto, no caso foi para outro array
+//Ao mapear também estamos dando o aumento de 10%
+
+val salariosComAumento = salarios.map {
+        salario -> (salario * taxaAumento).setScale(2, RoundingMode.UP)
+}.toTypedArray()
+
+println(salariosComAumento.contentToString())
+
+Nesse exemplo o salario indica cada elemento dentro do array Salarios, o setScale é para arrumar as casas decimais. O toTypedArray é para indicar que queremos mapear para outro array (sem ele o padrão é mapear para uma lista). 
+
+⦁	Função map dando o aumento pedido, 10%, sendo que o aumento tem que ser no mínimo de 500 reais:
+
+val salariosComAumento = salarios.map { salario ->
+    if(salario < "5000.00".toBigDecimal()){
+        salario + "500.00".toBigDecimal()
+    }else{
+        (salario * taxaAumento).setScale(2, RoundingMode.UP)
+    }
+}
+    .toTypedArray()
+
+println(salariosComAumento.contentToString())
+
+⦁	Pergunta:Maria recebeu um array de pedidos: val pedidos = longArrayOf(1300012, 1100013, 1200199, 1200222, 1100345, 1000012) Ela precisa criar uma lista que contenha apenas os pedidos menores que 1200000. Existe alguma função de processamento de coleções do Kotlin que possa ajudar a Maria a fazer isso?
+
+Resposta:Sim, ela pode utilizar a função filter: 
+
+	val pedidosSelecionados = pedidos.filter { it < 1200000 }
+
+A função filter irá filtrar todos os valores que satisfazem o predicado (condição passada entre as chaves após o nome da função). Nesse caso, os valores: 1100013, 1100345, 1000012.
+
+
+
+
+

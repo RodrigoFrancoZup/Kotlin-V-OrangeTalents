@@ -1,0 +1,134 @@
+Capítulo 04 - Trabalhando com listas
+Nesse capítulo aprendemos:
+
+⦁	Array não é a unica estrutura de dados. Vamos conhecer e trabalhar agora com Listas (list);
+
+⦁	Criando uma lista mutável e já colocando seus valores:
+
+val livros: MutableList<Livro> = mutableListOf(livro1, livro2, livro3, livro4)
+
+Obs: Os livros já foram criados!
+
+⦁	Diferente do array, não precisamos definir o tamanho da lista. Podemos sempre ir adicionando!
+
+⦁	Uma das maneiras de remover um elmento da lista, é passando para o metodo remove() o objeto que quermeos remover:
+
+//Remove o objeto livro1 da lista
+livros.remove(livro1)
+
+⦁	Imprimindo a lista formatadas, com extension function:
+
+fun MutableList<Livro>.imprimeComMarcadores(){
+    val textoFormatado = this.joinToString(separator = "\n") {
+        " - ${it.titulo} de ${it.autor}"
+    }
+    println(" ### Lista de Livros ### \n$textoFormatado")
+}
+
+Assim uma list de livro pode dar .imprimeComMarcadores() que será impresso (printado) o conteúdo da lista;
+
+⦁	Vamos alterar a nossa função imprimeComMarcadores, pois do jeito que está ela só funciona para MutableList, vamos deixá-la mais genérica, basta mudar sua assinatura para:
+
+	fun List<Livro>.imprimeComMarcadores()
+
+⦁	Vamos orderar a listagem do livro por ano de publicação do autor:
+
+1) Já existe a função para isso, é a sorted(), então basta fazer:
+	val ordenadoPorAnoPublicacao = livros.sorted()
+
+2)O código anterior não compila, pois ele exige que o elemento da lista seja do tipo comparable, então basta fazer a classe Livro implementar a interface Comparable<Livro>:
+
+data class Livro (
+    val titulo: String,
+    val autor: String,
+    val anoPublicacao: Long,
+    val editora: String? = null
+    ) : Comparable<Livro>{
+...
+
+E implementar o método compareTo. Como vamos comparar por ano de publicação esse método vai ficar assim:
+
+//Vamos orderar os livros por ano de publicação
+override fun compareTo(other: Livro): Int {
+    return this.anoPublicacao.compareTo(other.anoPublicacao)
+}
+
+
+⦁	A ordenação anterior funciona, o problema que só permite fazer um tipo de ordenação, e se quisessemos agora criar uma ordenação por nome do autor? Devemos mudar de método, no lugar do sorted() usar o sortedBy():
+
+//Ordenando pelo autor
+val ordenadoPorAutor = livros.sortedBy { it.autor }
+ordenadoPorAutor.imprimeComMarcadores()
+
+Desse modo, nem precisamos implementar interface na classe Livro.
+
+⦁	Filtrando lista:
+
+//Carregando uma lista mior de livros, que esta no arquivo livros
+//Filtrando pelo nome de autor
+
+listaDeLivrosCompleta
+    .filter { it.autor == "João Guimarães Rosa" }
+    .imprimeComMarcadores()
+
+Para isso funcionar no arquivo livros há uma lista chamado listaDeLivrosCompleta, e nessa lista há muitos livros (fiz isso para podermos testar mais
+
+⦁	A filtragem permite ser rodada junto com outras funções, por exemplo, a ordenagem, ficando assim:
+
+//Carregando uma lista mior de livros, que esta no arquivo livros
+//Filtrando pelo nome de autor
+//Ordenando pelo ano de publicação
+
+listaDeLivrosCompleta
+    .filter { it.autor == "João Guimarães Rosa" }
+    .sortedBy { it.anoPublicacao }
+    .imprimeComMarcadores()
+
+Outro exemplo:
+
+//Carregando uma lista maior de livros, que esta no arquivo livros
+//Filtrando pelo nome de autor que começa com "J"
+//Ordenando pelo ano de publicação
+
+listaDeLivrosCompleta
+    .filter { it.autor.startsWith("J") }
+    .sortedBy { it.anoPublicacao }
+    .imprimeComMarcadores()
+
+
+Outro Exemplo com Mapeamento:
+
+ //Carregando uma lista maior de livros, que esta no arquivo livros
+ //Filtrando pelo nome de autor que começa com "J"
+ //Ordenando pelo ano de publicação
+ //Gerando uma nova lista, que agora só terá os titulos dos livros (função map)
+
+val titulos: List<String> =  listaDeLivrosCompleta
+     .filter { it.autor.startsWith("J") }
+     .sortedBy { it.anoPublicacao }
+     .map {it.titulo}
+
+
+⦁	Pergunta:
+Considerando a classe Livro utilizada nesta aula:
+
+data class Livro(
+   val titulo: String,
+   val autor: String,
+   val anoPublicacao: Long,
+   val editora: String? = null
+)
+
+E uma lista de livros:
+val livros: List<Livro> = listOf(livro1, livro2, livro3, livro4)
+
+Como transformar a lista de livros em uma lista do tipo List<Long> com os anos de publicação de todos os livros?
+
+Resposta:
+	val publicacoes = livros.map { it.anoPublicacao }
+
+
+
+
+
+

@@ -1,0 +1,118 @@
+Capítulo 01 - Introdução aos arrays
+Nesse capítulo aprendemos:
+
+⦁	O dono da empresa quer saber a maior idade entre os funcionários. Poderiamos resolver isso com "id's", o problema que cada funcionário novo, nós teremos que aumentar as condições do if, ou seja, não é viavel. O código com if:
+
+val idade1 = 25
+val idade2 = 19
+val idade3 = 33
+
+val maioridade = if (idade1 > idade2 && idade1 > idade3){
+    idade1
+}else if(idade2> idade3){
+    idade2
+}else{
+    idade3
+}
+println("A maior idade é: $maioridade")
+
+⦁	Outra forma de fazer isso, é colocando a idade em uma "coleção", em uma estrutura de dados, no caso vamos usar o array. Depois basta percorrer essa estrutura.
+
+⦁	Como criar um array de inteiro:
+
+	val idades = IntArray(3)
+	idades[0] = 25
+	idades[1] = 19
+	idades[2] = 33
+
+	Note que para criar um array temos que indicar o seu tamanho, e para adicionar elementos temos que deixar claro o indice, esse indice começa em 0.
+
+⦁	Resolvendo o problema, mas agora com array: poderíamos fazer um if com os valores do array, mas daí não vai mudar muito da primeira solução (sem array).
+
+⦁	Percorrendo array com laço (looping) for:
+
+	var maiorIdade = Int.MIN_VALUE
+	for(idade in idades){
+    	if(idade > maiorIdade){
+        	maiorIdade = idade
+    	}
+	}
+
+Aqui o entendimento é: para cara idade dentro do array idades, vou fazer alguma coisa.
+
+⦁	Declarando aray e já atribuindo valor. Usando o intArrayOf:
+
+	val idades = intArrayOf(25,19,33)
+
+	Nesse modo não precisamos indicar o tamanho do array!
+
+⦁	Perorrendo o array com o foreach. foreach é um método/função do array e que recebe uma função por parâmetro. Funciona assim:
+
+	var maiorIdade = Int.MIN_VALUE
+	idades.forEach { idade ->
+    	if(idade > maiorIdade){
+        	maiorIdade = idade
+    	}
+	}
+
+	Com foreach podemos passar uma função por parâmetro ou já criar uma função dentro dela, nesse caso a função foi nosso "if"
+
+⦁	Agora vamos mudar de problema! Agora teremos uma coleçao de dados que será os salários de funcionários, e vamos querer aplicar um aumento de 10% em todos os salários;
+
+⦁	Criando o array de salários:
+	
+	val salarios = doubleArrayOf(1500.0, 2300.0, 5000.0, 8000.0, 10000.0)
+
+⦁	Poderíamos tentar resolver o problema com o seguinte código, mas não funcionará e saberemos o motivo a seguir:
+
+	for(salario in salarios){
+    	salario = salario * taxaAumento
+	}
+
+Isso não funciona, pois a referencia que temos do salário "salario" é imutavel! Não tem como colocar o valor direto dele. 
+
+Para resolver isso, temos que acessar o indice do elemento.
+
+⦁	Percorrendo o array, agora com indice, mas o indice ainda é feito por nós mesmos:
+
+
+	val salarios = doubleArrayOf(1500.0, 2300.0, 5000.0, 8000.0, 10000.0)
+	var taxaAumento = 1.1
+	var indice = 0
+
+	for(salario in salarios){
+    	salarios[indice] = salario * taxaAumento
+    	indice++
+	}
+	println(salarios.contentToString())
+
+O kotlin vai reclamar, pois ele já tem seu método com indice. Vamos usá-lo
+
+⦁	Percorrendo array pelo indice do kotlin/array:
+
+	val salarios = doubleArrayOf(1500.0, 2300.0, 5000.0, 8000.0, 10000.0)
+	var taxaAumento = 1.1
+
+	for(indice in salarios.indices){
+    	salarios[indice] = salarios[indice] * taxaAumento
+	}
+	println(salarios.contentToString())
+
+⦁	Percorrendo o array pelo foreach com indice:
+
+	val salarios = doubleArrayOf(1500.0, 2300.0, 5000.0, 8000.0, 10000.0)
+	var taxaAumento = 1.1
+
+	salarios.forEachIndexed{i, salario ->
+    	salarios[i] = salario * taxaAumento
+	}
+	println(salarios.contentToString())
+
+	Como o primeiro foearch, nós vamos passar uma função por parâmetro e alé disso teremos dois parâmetros, o indice que chamamos de "i" e o elemento do array que chamamos de "salario"
+
+
+
+
+
+
+

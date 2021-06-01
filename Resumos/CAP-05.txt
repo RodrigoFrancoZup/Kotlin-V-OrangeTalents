@@ -1,0 +1,119 @@
+Capítulo 05 - Problemas comuns das coleções
+Nesse capítulo aprendemos:
+
+⦁	Um problema comum é lidar com nulo (null);
+
+⦁	Como indicar que nossa lista pode ter um elemento nulo? Assim: 
+
+val listaLivrosComNulos: MutableList<Livro?> = mutableListOf
+
+⦁	Vamos pegar uma lista com elementos nulos e tentar chamar o método imprimeComMarcadores, vamos ver que não vai compilar, pois esse método não ta configurado para aceitar lista com nulos. Vamos fazer isso. O método vai ficar assim:
+
+
+fun List<Livro?>.imprimeComMarcadores() {
+    val textoFormatado = this
+        .filterNotNull()
+        .joinToString(separator = "\n") {
+        " - ${it?.titulo} de ${it?.autor}"
+    }
+    println(" ### Lista de Livros ### \n$textoFormatado")
+}
+
+E agora vou poder chamar o método:
+
+	listaLivrosComNulos.imprimeComMarcadores()
+
+⦁	Quando criamos a classe Livro, falamos que o propertie editora pode ser nula, ou seja, na listaDeLivroCompleta não tem elemento nulo, mas tem elementos que pode ter propertie nulo, daí isso em alguns casos pode gerar ENP, ou valores incorretos, como é no próximo exemplo. Veja esse exemplo:
+
+//Agrupamento de livros por editora:
+
+
+listaDeLivrosCompleta
+    .groupBy { it.editora }
+    .forEach{(editora, livros) ->
+        println("$editora: ${livros.joinToString { it.titulo }}")
+    }
+
+Haverá um grupo cuja editora é null. Podemos resolver isso da seguinte forma (uso do elvis operator "?:" :
+
+listaDeLivrosCompleta
+    .groupBy { it.editora ?: "Editora Desconhecida"}
+    .forEach{(editora, livros) ->
+        println("$editora: ${livros.joinToString { it.titulo }}")
+    }
+
+⦁	Organizando os Livros de outras formas. Vamos criar um classe chamada Prateleira, essa classe terá duas properties, sendo uma lista de livro e uma categoria. Essa classe também terá duas funçoes, uma para organizar a lista por autor e outra por ano de publicação. Ficará assim:
+
+data class Prateleira(
+    val genero: String,
+    val livros: MutableList<Livro>
+) {
+    fun organizarPorAutor() : MutableList<Livro>{
+        livros.sortBy { it.autor }
+        return livros
+    }
+
+    fun organizarPorAnoPublicacao() : MutableList<Livro>{
+        livros.sortBy { it.anoPublicacao }
+        return livros
+    }
+}
+
+Agora no arquivo usaPrateleira (arquivo para teste com função main()) vamos criar uma prateleira, passar pra ela uma lista, uma categoria e pedir para organizar os livros e imprimi-los:
+
+val pratileira = Prateleira(genero = "Literatura", livros = listaDeLivrosCompleta)
+
+pratileira.organizarPorAutor().imprimeComMarcadores()
+
+pratileira.organizarPorAnoPublicacao().imprimeComMarcadores()
+
+
+O código funcionará perfeitamente. Mas faz de conta que temos outras maneiras de imprimir o conteúdo da lista, logo vamos querer guardar a organização da prateleira em uma variável e enviá-la para outro método, ficando assim:
+
+val pratileira = Prateleira(genero = "Literatura", livros = listaDeLivrosCompleta)
+
+val porAutor = pratileira.organizarPorAutor().imprimeComMarcadores()
+
+val porAnoPublicacao = pratileira.organizarPorAnoPublicacao().imprimeComMarcadores()
+
+//Como não temos outra maneira, vamos imprimi-las assim mesmo:
+
+	porAutor.imprimeComMarcadores()
+	porAnoPublicacao.imprimeComMarcadores()
+
+O código rodará, mas nas duas listas teremos a organização por ano de publicação, sabe o por que disso? Que antes a gente organizava e já imprimia, agora estamos fazendo duas organizações em cima da mesma referencia de lista, e só depois vamos pedir pra imprimi-las, logo que vai prevalecer é a última organização feita!
+
+Esse é um problema de MUTABILIDADE!
+
+⦁	Como podemos resolver a mutabilidade? Poderiamos na classe Prateleira mudar o tipo da propertie livro de MutableList para List (esse é imutavél), logo essa não possui métodos para organizar a lista (sortBy), mas ela possui o método sortedBy (ATENÇÃO! a diferença é mínima no nome), essa função não altera a própia lista, ela altera e retorna outra lista! 
+
+Agora vai funcionar! Veja como ficou a classe Prateleira:
+
+data class Prateleira(
+    val genero: String,
+    val livros: List<Livro>
+) {
+    fun organizarPorAutor(): List<Livro> {
+        return livros.sortedBy { it.autor }
+    }
+
+    fun organizarPorAnoPublicacao() : List<Livro>{
+        return livros.sortedBy { it.anoPublicacao }
+    }
+}
+
+
+⦁	Pergunta: Fernando precisa ordenar a lista usuarios que representa um conjunto de usuários do seu sistema Web. Quando ele digita o código: usuarios.sort... a IDE sugere as funções sortBy e sortedBy para completar o código. Qual é a diferença entre as duas funções?
+
+Resposta:
+A função sortBy reorganiza os elementos da coleção que a invocou de acordo com um critério, enquanto a função sortedBy cria uma nova coleção ordenada de acordo com um critério, poupando a lista original.
+
+Justificativa:
+A função sortBy manipula a coleção que invocou a função e, por isso mesmo, só está presente em coleções mutáveis, já a função sortedBy cria uma nova coleção sem interferir no objeto que invoca a função.
+
+
+
+
+
+
+
